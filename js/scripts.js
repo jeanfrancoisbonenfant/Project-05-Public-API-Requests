@@ -99,10 +99,11 @@ function popup(data) {
         closeButton = document.querySelector(".modal-close-btn");
         index = nextIndex;
         if (nextIndex === 11) {
+          next = document.querySelector(".modal-next");
           next.style.display = "none";
         } else {
-          next.style.display = "";
           next = document.querySelector(".modal-next");
+          next.style.display = "";
         }
       }
 

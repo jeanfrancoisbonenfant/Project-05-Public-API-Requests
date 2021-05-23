@@ -87,38 +87,32 @@ function generateModal(data) {
   body.insertAdjacentHTML("beforeend", modal);
 }
 
+let index = 0;
+let closeButton;
+let next;
 //Create modal window
 function popUp(data) {
   const card = document.querySelectorAll(".card");
   for (let i = 0; i < card.length; i++) {
     card[i].addEventListener("click", (e) => {
       //use the index of the employees to generate desired modal
-      let index = e.target.dataset.indexNumber;
+      index = parseInt(e.target.dataset.indexNumber);
       generateModal(employees[index]);
-
-      //eventlistener for the close button
-      let closeButton = document.querySelector(".modal-close-btn");
-      closeButton.addEventListener("click", (e) => closePopUp());
-
-      let next = document.querySelector(".modal-next");
-      //Function to use the index for current modal to close and generate next employee modal
-      function nextPopUp() {
-        let nextIndex = parseInt(index) + 1;
-        closePopUp();
-        generateModal(employees[nextIndex]);
-        //update closeButton & index to reuse next & close EventListener
-        closeButton = document.querySelector(".modal-close-btn");
-        index = nextIndex;
-        if (nextIndex === 11) {
-          next = document.querySelector(".modal-next");
-          next.style.display = "none";
-        } else {
-          next = document.querySelector(".modal-next");
-          next.style.display = "";
-        }
+      if (index === 0) {
+        previous = document.querySelector(".modal-prev");
+        previous.style.display = "none";
+      } else if (index === 11) {
+        next = document.querySelector(".modal-next");
+        next.style.display = "none";
       }
 
+      //eventlistener for the close button
+      closeButton = document.querySelector(".modal-close-btn");
+      closeButton.addEventListener("click", (e) => closePopUp());
+      next = document.querySelector(".modal-next");
       next.addEventListener("click", (e) => nextPopUp());
+      previous = document.querySelector(".modal-prev");
+      previous.addEventListener("click", (e) => previousPopUp());
     });
   }
 }
@@ -129,5 +123,35 @@ function closePopUp() {
   const modal = document.querySelector(".modal-container");
   body.removeChild(modal);
 }
-
+//Function to use the index for current modal to close and generate next employee modal
+function nextPopUp() {
+  let nextIndex = parseInt(index) + 1;
+  closePopUp();
+  generateModal(employees[nextIndex]);
+  //update closeButton & index to reuse next & close EventListener
+  closeButton = document.querySelector(".modal-close-btn");
+  index = nextIndex;
+  if (nextIndex === 11) {
+    next = document.querySelector(".modal-next");
+    next.style.display = "none";
+  } else {
+    next = document.querySelector(".modal-next");
+    next.style.display = "";
+  }
+}
+function previousPopUp() {
+  let previousIndex = parseInt(index) - 1;
+  closePopUp();
+  generateModal(employees[previousIndex]);
+  //update closeButton & index to reuse next & close EventListener
+  closeButton = document.querySelector(".modal-close-btn");
+  index = previousIndex;
+  if (previousIndex === 0) {
+    previous = document.querySelector(".modal-next");
+    previous.style.display = "none";
+  } else {
+    previous = document.querySelector(".modal-next");
+    previous.style.display = "";
+  }
+}
 fetchData(randomUserUrl);

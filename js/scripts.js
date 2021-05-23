@@ -4,9 +4,10 @@ let employees;
 async function fetchData(randomUserUrl) {
   const response = await fetch(randomUserUrl);
   const data = await response.json();
+  //store generated employees to reuse data
   employees = data.results;
   generateHTML(data);
-  popup(employees);
+  popUp(employees);
   return data;
 }
 function generateHTML(data) {
@@ -46,17 +47,21 @@ function generateHTML(data) {
 function generateModal(data) {
   const body = document.querySelector("body");
   const person = data;
+  //Phone number reGex to remove special Character
   const phone = person.cell.replace(/[\W+]/g, "");
-
+  //reFormat phone number on desired format
   const phoneNumber = `(${phone.substring(0, 3)}) ${phone.substring(
     3,
     6
   )}-${phone.substring(6, 10)}`;
+  //Slice useless character from date of birth & remove special character
   const dob = person.dob.date.slice(0, 10).replace(/[-]/g, "");
+  //reformat Birthday on desired format
   const Birthday = `${dob.substring(4, 6)}/${dob.substring(
     6,
     8
   )}/${dob.substring(0, 4)}`;
+  //Create modal template
   const modal = `
    <div class="modal-container">
                 <div class="modal">
@@ -78,24 +83,30 @@ function generateModal(data) {
                 </div>
             </div>
   `;
+  //append modal
   body.insertAdjacentHTML("beforeend", modal);
 }
 
-function popup(data) {
+//Create modal window
+function popUp(data) {
   const card = document.querySelectorAll(".card");
   for (let i = 0; i < card.length; i++) {
     card[i].addEventListener("click", (e) => {
+      //use the index of the employees to generate desired modal
       let index = e.target.dataset.indexNumber;
       generateModal(employees[index]);
 
+      //eventlistener for the close button
       let closeButton = document.querySelector(".modal-close-btn");
       closeButton.addEventListener("click", (e) => closePopUp());
 
       let next = document.querySelector(".modal-next");
+      //Function to use the index for current modal to close and generate next employee modal
       function nextPopUp() {
         let nextIndex = parseInt(index) + 1;
         closePopUp();
         generateModal(employees[nextIndex]);
+        //update closeButton & index to reuse next & close EventListener
         closeButton = document.querySelector(".modal-close-btn");
         index = nextIndex;
         if (nextIndex === 11) {
@@ -112,6 +123,7 @@ function popup(data) {
   }
 }
 
+//function to close the Modal window created by Popup
 function closePopUp() {
   const body = document.querySelector("body");
   const modal = document.querySelector(".modal-container");

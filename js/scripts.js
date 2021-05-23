@@ -8,6 +8,12 @@ async function fetchData(randomUserUrl) {
   employees = data.results;
   generateHTML(data);
   popUp(employees);
+  searchDisplay();
+  const searchInput = document.querySelector(".search-input");
+  searchInput.addEventListener("change", (e) => {
+    searchFunction(employees);
+  });
+
   return data;
 }
 function generateHTML(data) {
@@ -98,9 +104,11 @@ function popUp(data) {
       //use the index of the employees to generate desired modal
       index = parseInt(e.target.dataset.indexNumber);
       generateModal(employees[index]);
+      //if index === 0 remove previous button
       if (index === 0) {
         previous = document.querySelector(".modal-prev");
         previous.style.display = "none";
+        //if index === 11 remove next button
       } else if (index === 11) {
         next = document.querySelector(".modal-next");
         next.style.display = "none";
@@ -123,6 +131,10 @@ function closePopUp() {
   const modal = document.querySelector(".modal-container");
   body.removeChild(modal);
 }
+
+/* Exceed Expectation section
+     ========================================================================== */
+
 //Function to use the index for current modal to close and generate next employee modal
 function nextPopUp() {
   let nextIndex = parseInt(index) + 1;
@@ -154,4 +166,47 @@ function previousPopUp() {
     previous.style.display = "";
   }
 }
+
+function searchDisplay() {
+  const searchContainer = document.querySelector(".search-container");
+  const html = `
+    <form action="#" method="get">
+                            <input type="search" id="search-input" class="search-input" placeholder="Search...">
+                            <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
+                        </form>
+  `;
+  searchContainer.insertAdjacentHTML("beforeend", html);
+}
+
+//search Function
+const searchFunction = (employees) => {
+  const employeesGallery = document.querySelector(".gallery");
+  const searchInput = document
+    .querySelector(".search-input")
+    .value.toLowerCase();
+  //Empty array to store search result.
+  const results = [];
+
+  /*Compare search input to listFirstName or listLastName and append match to results array
+  also call function to display search result*/
+  for (let i = 0; i < employees.length; i++) {
+    const employeesFirstName = Object.values(employees[i].name.first)
+      .join("")
+      .toLowerCase();
+    const employeesLastName = Object.values(employees[i].name.last)
+      .join("")
+      .toLowerCase();
+    if (
+      (searchInput !== 0 && employeesFirstName.includes(searchInput)) ||
+      employeesLastName.includes(searchInput)
+    ) {
+      results.push(list[i]);
+      employeesGallery.textContent = "";
+      generateHTML(results);
+    }
+  } //Return No result & adjust pagination.
+  if (results == 0) {
+    employeesGallery.textContent = `No results found`;
+  }
+};
 fetchData(randomUserUrl);

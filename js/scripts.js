@@ -1,18 +1,43 @@
 const randomUserUrl =
   "https://randomuser.me/api/?results=12&inc=picture,name,email,location,cell,dob&nat=us";
-let employees;
-const body = document.querySelector("body");
 
+/**
+ * @type {Object}
+ */
+let employees;
+
+/**
+ * @type {number}
+ */
 let index = 0;
+
+/**
+ * Async Function
+ *
+ * @param {API}  - Receive API link
+ */
 async function fetchData(randomUserUrl) {
-  const response = await fetch(randomUserUrl);
-  const data = await response.json();
-  //store generated employees to reuse data
-  employees = data.results;
-  generateHTML(data.results);
-  popUp(employees);
-  searchDisplay(data.results);
+  try {
+    const response = await fetch(randomUserUrl);
+    const data = await response.json();
+    //store generated employees to reuse data
+    employees = data.results;
+    //Call Function to Initialize page
+    generateHTML(data.results);
+    popUp(employees);
+    searchDisplay(data.results);
+  } catch (err) {
+    console.log(Error(err));
+  }
 }
+
+/**
+ * Function generate HTML layout &
+ * Append it to the gallery Div
+ *
+ * @param {Object}  - Receive data Object
+ */
+
 function generateHTML(data) {
   const gallery = document.querySelector(".gallery");
   const html = data
@@ -46,6 +71,12 @@ function generateHTML(data) {
     .join("");
   gallery.insertAdjacentHTML("beforeend", html);
 }
+
+/**
+ * Function generate modal layout &
+ * Append it after the gallery Div
+ * @param {Object}  - Receive data Object
+ */
 
 function generateModal(data) {
   const gallery = document.querySelector(".gallery");
@@ -89,18 +120,46 @@ function generateModal(data) {
   //append modal
   gallery.insertAdjacentHTML("afterend", modal);
 
+  /**
+   * Event Listener
+   * @event click
+   * @fires closePopUp()
+   * @listens .modal-close-btn
+   */
   closeButton = document.querySelector(".modal-close-btn");
   closeButton.addEventListener("click", (e) => closePopUp());
+  /**
+   * Event Listener
+   * @event click
+   * @fires nextPopUp()
+   * @listens .modal-next
+   */
   next = document.querySelector(".modal-next");
   next.addEventListener("click", (e) => nextPopUp());
+  /**
+   * Event Listener
+   * @event click
+   * @fires previousPopUp()
+   * @listens .modal-prev
+   */
   previous = document.querySelector(".modal-prev");
   previous.addEventListener("click", (e) => previousPopUp());
 }
 
-//Create modal window
+/**
+ * Function generate modal layout &
+ * @function
+ * @param {Object}  - Receive data Object
+ */
 function popUp(data) {
   const card = document.querySelectorAll(".card");
   for (let i = 0; i < card.length; i++) {
+    /**
+     * Event Listener
+     * @event click
+     * @fires generateModal()
+     * @listens .card
+     */
     card[i].addEventListener("click", (e) => {
       //use the index of the employees to generate desired modal
       index = parseInt(e.target.dataset.indexNumber);
@@ -114,13 +173,13 @@ function popUp(data) {
         next = document.querySelector(".modal-next");
         next.style.display = "none";
       }
-
-      //eventlistener for the close button
     });
   }
 }
 
-//function to close the Modal window created by Popup
+/**
+ * @function - Remove modal when called
+ */
 function closePopUp() {
   const body = document.querySelector("body");
   const modal = document.querySelector(".modal-container");
@@ -130,7 +189,13 @@ function closePopUp() {
 /* Exceed Expectation section
      ========================================================================== */
 
-//Function to use the index for current modal to close and generate next employee modal
+/**
+ * @function - Take current index and add 1
+ * Close current modal
+ * Generate next modal
+ * @if last remove next button
+ */
+
 function nextPopUp() {
   let nextIndex = parseInt(index) + 1;
   closePopUp();
@@ -146,6 +211,14 @@ function nextPopUp() {
     next.style.display = "";
   }
 }
+
+/**
+ * @function - Take current index and substract 1
+ * Close current modal
+ * Generate previous modal
+ * @if first remove previous button
+ */
+
 function previousPopUp() {
   let previousIndex = parseInt(index) - 1;
   closePopUp();
@@ -162,21 +235,46 @@ function previousPopUp() {
   }
 }
 
-/*const searchInput = document.querySelector(".search-input");
-searchInput.addEventListener("change", (e) => {
-  searchFunction(employees);
-});*/
-//search Function
+/**
+ * @function - Create search Html
+ * @param {Object}
+ */
+function searchDisplay(data) {
+  const searchContainer = document.querySelector(".search-container");
+  const html = `
+    <form action="#" method="get">
+                            <input type="search" id="search-input" class="search-input" placeholder="Search...">
+                            <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
+                        </form>
+  `;
+  searchContainer.insertAdjacentHTML("beforeend", html);
+
+  /**
+   * Event Listener
+   * @event keyup
+   * @fires searchFunction()
+   * @listens .search-input
+   */
+  const searchInput = document.querySelector(".search-input");
+  searchInput.addEventListener("keyup", (e) => searchFunction(data));
+}
+
+/**
+ * @function - Search Engine
+ * @param {Object}
+ * Compare between galery data & search Input data
+ * first name or last name
+ * push valid result into results array
+ * Call function with results
+ */
 const searchFunction = (data) => {
-  const employeesGallery = document.querySelector(".gallery");
+  const gallery = document.querySelector(".gallery");
   const searchInput = document
     .querySelector(".search-input")
     .value.toLowerCase();
   //Empty array to store search result.
   const results = [];
 
-  /*Compare search input to listFirstName or listLastName and append match to results array
-  also call function to display search result*/
   for (let i = 0; i < data.length; i++) {
     const employeesFirstName = Object.values(data[i].name.first)
       .join("")
@@ -189,28 +287,16 @@ const searchFunction = (data) => {
       employeesLastName.includes(searchInput)
     ) {
       results.push(data[i]);
-      employeesGallery.textContent = "";
+      gallery.textContent = "";
       employees = results;
       generateHTML(results);
       popUp(results);
     }
-  } //Return No result & adjust pagination.
+  } //Return No result.
   if (results == 0) {
-    employeesGallery.textContent = `No results found`;
+    gallery.textContent = `No results found`;
   }
 };
-//Create search Inputfield
-function searchDisplay(data) {
-  const searchContainer = document.querySelector(".search-container");
-  const html = `
-    <form action="#" method="get">
-                            <input type="search" id="search-input" class="search-input" placeholder="Search...">
-                            <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
-                        </form>
-  `;
-  searchContainer.insertAdjacentHTML("beforeend", html);
-  const searchInput = document.querySelector(".search-input");
-  searchInput.addEventListener("keyup", (e) => searchFunction(data));
-}
 
+//call Async function
 fetchData(randomUserUrl);

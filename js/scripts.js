@@ -1,6 +1,11 @@
 const randomUserUrl =
-  "https://randomuser.me/api/?results=12&inc=picture,name,email,location,cell,dob&nat=us,dk,fr,gb,ca";
+  "https://randomuser.me/api/?results=12&inc=picture,name,email,location,cell,dob&nat=us";
 let employees;
+const body = document.querySelector("body");
+
+modalDiv();
+let modals = document.querySelector(".modals");
+
 async function fetchData(randomUserUrl) {
   const response = await fetch(randomUserUrl);
   const data = await response.json();
@@ -9,12 +14,6 @@ async function fetchData(randomUserUrl) {
   generateHTML(data);
   popUp(employees);
   searchDisplay();
-  const searchInput = document.querySelector(".search-input");
-  searchInput.addEventListener("change", (e) => {
-    searchFunction(employees);
-  });
-
-  return data;
 }
 function generateHTML(data) {
   const gallery = document.querySelector(".gallery");
@@ -51,7 +50,7 @@ function generateHTML(data) {
 }
 
 function generateModal(data) {
-  const body = document.querySelector("body");
+  const modals = document.querySelector(".modals");
   const person = data;
   //Phone number reGex to remove special Character
   const phone = person.cell.replace(/[\W+]/g, "");
@@ -90,7 +89,7 @@ function generateModal(data) {
             </div>
   `;
   //append modal
-  body.insertAdjacentHTML("beforeend", modal);
+  modals.insertAdjacentHTML("beforeend", modal);
 }
 
 let index = 0;
@@ -115,21 +114,21 @@ function popUp(data) {
       }
 
       //eventlistener for the close button
-      closeButton = document.querySelector(".modal-close-btn");
-      closeButton.addEventListener("click", (e) => closePopUp());
-      next = document.querySelector(".modal-next");
-      next.addEventListener("click", (e) => nextPopUp());
-      previous = document.querySelector(".modal-prev");
-      previous.addEventListener("click", (e) => previousPopUp());
     });
   }
 }
-
+function modalDiv() {
+  const newDiv = `
+  <div class="modals">
+  </div>
+  `;
+  body.insertAdjacentHTML("beforeend", newDiv);
+}
 //function to close the Modal window created by Popup
 function closePopUp() {
   const body = document.querySelector("body");
   const modal = document.querySelector(".modal-container");
-  body.removeChild(modal);
+  modals.removeChild(modal);
 }
 
 /* Exceed Expectation section
@@ -178,6 +177,10 @@ function searchDisplay() {
   searchContainer.insertAdjacentHTML("beforeend", html);
 }
 
+/*const searchInput = document.querySelector(".search-input");
+searchInput.addEventListener("change", (e) => {
+  searchFunction(employees);
+});*/
 //search Function
 const searchFunction = (employees) => {
   const employeesGallery = document.querySelector(".gallery");
@@ -209,4 +212,15 @@ const searchFunction = (employees) => {
     employeesGallery.textContent = `No results found`;
   }
 };
+modals.addEventListener("click", (e) => {
+  const modal = document.querySelector(".modals").children;
+  if (modal.length !== 0) {
+    closeButton = document.querySelector(".modal-close-btn");
+    closeButton.addEventListener("click", (e) => closePopUp());
+    next = document.querySelector(".modal-next");
+    next.addEventListener("click", (e) => nextPopUp());
+    previous = document.querySelector(".modal-prev");
+    previous.addEventListener("click", (e) => previousPopUp());
+  }
+});
 fetchData(randomUserUrl);

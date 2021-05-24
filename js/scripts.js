@@ -4,8 +4,6 @@ let employees;
 const body = document.querySelector("body");
 
 let index = 0;
-let closeButton;
-let next;
 async function fetchData(randomUserUrl) {
   const response = await fetch(randomUserUrl);
   const data = await response.json();
@@ -13,7 +11,7 @@ async function fetchData(randomUserUrl) {
   employees = data.results;
   generateHTML(data.results);
   popUp(employees);
-  searchDisplay();
+  searchDisplay(data.results);
 }
 function generateHTML(data) {
   const gallery = document.querySelector(".gallery");
@@ -112,7 +110,7 @@ function popUp(data) {
         previous = document.querySelector(".modal-prev");
         previous.style.display = "none";
         //if index === 11 remove next button
-      } else if (index === 11) {
+      } else if (index === data.length - 1) {
         next = document.querySelector(".modal-next");
         next.style.display = "none";
       }
@@ -121,14 +119,7 @@ function popUp(data) {
     });
   }
 }
-/*
-function modalDiv() {
-  const newDiv = `
-  <div class="modals">
-  </div>
-  `;
-  body.insertAdjacentHTML("beforeend", newDiv);
-}*/
+
 //function to close the Modal window created by Popup
 function closePopUp() {
   const body = document.querySelector("body");
@@ -147,7 +138,7 @@ function nextPopUp() {
   //update closeButton & index to reuse next & close EventListener
   closeButton = document.querySelector(".modal-close-btn");
   index = nextIndex;
-  if (nextIndex === 11) {
+  if (nextIndex === employees.length - 1) {
     next = document.querySelector(".modal-next");
     next.style.display = "none";
   } else {
@@ -176,7 +167,7 @@ searchInput.addEventListener("change", (e) => {
   searchFunction(employees);
 });*/
 //search Function
-const searchFunction = (employees) => {
+const searchFunction = (data) => {
   const employeesGallery = document.querySelector(".gallery");
   const searchInput = document
     .querySelector(".search-input")
@@ -186,19 +177,20 @@ const searchFunction = (employees) => {
 
   /*Compare search input to listFirstName or listLastName and append match to results array
   also call function to display search result*/
-  for (let i = 0; i < employees.length; i++) {
-    const employeesFirstName = Object.values(employees[i].name.first)
+  for (let i = 0; i < data.length; i++) {
+    const employeesFirstName = Object.values(data[i].name.first)
       .join("")
       .toLowerCase();
-    const employeesLastName = Object.values(employees[i].name.last)
+    const employeesLastName = Object.values(data[i].name.last)
       .join("")
       .toLowerCase();
     if (
       (searchInput !== 0 && employeesFirstName.includes(searchInput)) ||
       employeesLastName.includes(searchInput)
     ) {
-      results.push(employees[i]);
+      results.push(data[i]);
       employeesGallery.textContent = "";
+      employees = results;
       generateHTML(results);
       popUp(results);
     }
@@ -208,7 +200,7 @@ const searchFunction = (employees) => {
   }
 };
 //Create search Inputfield
-function searchDisplay() {
+function searchDisplay(data) {
   const searchContainer = document.querySelector(".search-container");
   const html = `
     <form action="#" method="get">
@@ -218,7 +210,7 @@ function searchDisplay() {
   `;
   searchContainer.insertAdjacentHTML("beforeend", html);
   const searchInput = document.querySelector(".search-input");
-  searchInput.addEventListener("keyup", (e) => searchFunction(employees));
+  searchInput.addEventListener("keyup", (e) => searchFunction(data));
 }
 
 fetchData(randomUserUrl);

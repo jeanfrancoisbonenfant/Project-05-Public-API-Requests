@@ -3,42 +3,42 @@ const randomUserUrl =
 let employees;
 const body = document.querySelector("body");
 
-modalDiv();
-let modals = document.querySelector(".modals");
-
+let index = 0;
+let closeButton;
+let next;
 async function fetchData(randomUserUrl) {
   const response = await fetch(randomUserUrl);
   const data = await response.json();
   //store generated employees to reuse data
   employees = data.results;
-  generateHTML(data);
+  generateHTML(data.results);
   popUp(employees);
   searchDisplay();
 }
 function generateHTML(data) {
   const gallery = document.querySelector(".gallery");
-  const html = data.results
+  const html = data
     .map(
       (person) =>
         `
-      <div class="card" data-index-number = ${data.results.indexOf(person)}>
-                    <div class="card-img-container"data-index-number = ${data.results.indexOf(
+      <div class="card" data-index-number = ${data.indexOf(person)}>
+                    <div class="card-img-container"data-index-number = ${data.indexOf(
                       person
                     )}>
-                        <img class="card-img" data-index-number = ${data.results.indexOf(
+                        <img class="card-img" data-index-number = ${data.indexOf(
                           person
                         )} src="${person.picture.large}" alt="profile picture">
                     </div>
-                    <div class="card-info-container" data-index-number = ${data.results.indexOf(
+                    <div class="card-info-container" data-index-number = ${data.indexOf(
                       person
                     )}>
-                        <h3 id="name" class="card-name cap" data-index-number = ${data.results.indexOf(
+                        <h3 id="name" class="card-name cap" data-index-number = ${data.indexOf(
                           person
                         )}>${person.name.first} ${person.name.last}</h3>
-                        <p class="card-text" data-index-number = ${data.results.indexOf(
+                        <p class="card-text" data-index-number = ${data.indexOf(
                           person
                         )}>${person.email}</p>
-                        <p class="card-text cap" data-index-number = ${data.results.indexOf(
+                        <p class="card-text cap" data-index-number = ${data.indexOf(
                           person
                         )}>${person.location.city}, ${person.location.state}</p>
                     </div>
@@ -50,7 +50,7 @@ function generateHTML(data) {
 }
 
 function generateModal(data) {
-  const modals = document.querySelector(".modals");
+  const gallery = document.querySelector(".gallery");
   const person = data;
   //Phone number reGex to remove special Character
   const phone = person.cell.replace(/[\W+]/g, "");
@@ -89,12 +89,16 @@ function generateModal(data) {
             </div>
   `;
   //append modal
-  modals.insertAdjacentHTML("beforeend", modal);
+  gallery.insertAdjacentHTML("afterend", modal);
+
+  closeButton = document.querySelector(".modal-close-btn");
+  closeButton.addEventListener("click", (e) => closePopUp());
+  next = document.querySelector(".modal-next");
+  next.addEventListener("click", (e) => nextPopUp());
+  previous = document.querySelector(".modal-prev");
+  previous.addEventListener("click", (e) => previousPopUp());
 }
 
-let index = 0;
-let closeButton;
-let next;
 //Create modal window
 function popUp(data) {
   const card = document.querySelectorAll(".card");
@@ -102,7 +106,7 @@ function popUp(data) {
     card[i].addEventListener("click", (e) => {
       //use the index of the employees to generate desired modal
       index = parseInt(e.target.dataset.indexNumber);
-      generateModal(employees[index]);
+      generateModal(data[index]);
       //if index === 0 remove previous button
       if (index === 0) {
         previous = document.querySelector(".modal-prev");
@@ -117,18 +121,19 @@ function popUp(data) {
     });
   }
 }
+/*
 function modalDiv() {
   const newDiv = `
   <div class="modals">
   </div>
   `;
   body.insertAdjacentHTML("beforeend", newDiv);
-}
+}*/
 //function to close the Modal window created by Popup
 function closePopUp() {
   const body = document.querySelector("body");
   const modal = document.querySelector(".modal-container");
-  modals.removeChild(modal);
+  body.removeChild(modal);
 }
 
 /* Exceed Expectation section
@@ -158,23 +163,12 @@ function previousPopUp() {
   closeButton = document.querySelector(".modal-close-btn");
   index = previousIndex;
   if (previousIndex === 0) {
-    previous = document.querySelector(".modal-next");
+    previous = document.querySelector(".modal-prev");
     previous.style.display = "none";
   } else {
-    previous = document.querySelector(".modal-next");
+    previous = document.querySelector(".modal-prev");
     previous.style.display = "";
   }
-}
-
-function searchDisplay() {
-  const searchContainer = document.querySelector(".search-container");
-  const html = `
-    <form action="#" method="get">
-                            <input type="search" id="search-input" class="search-input" placeholder="Search...">
-                            <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
-                        </form>
-  `;
-  searchContainer.insertAdjacentHTML("beforeend", html);
 }
 
 /*const searchInput = document.querySelector(".search-input");
@@ -203,24 +197,28 @@ const searchFunction = (employees) => {
       (searchInput !== 0 && employeesFirstName.includes(searchInput)) ||
       employeesLastName.includes(searchInput)
     ) {
-      results.push(list[i]);
+      results.push(employees[i]);
       employeesGallery.textContent = "";
       generateHTML(results);
+      popUp(results);
     }
   } //Return No result & adjust pagination.
   if (results == 0) {
     employeesGallery.textContent = `No results found`;
   }
 };
-modals.addEventListener("click", (e) => {
-  const modal = document.querySelector(".modals").children;
-  if (modal.length !== 0) {
-    closeButton = document.querySelector(".modal-close-btn");
-    closeButton.addEventListener("click", (e) => closePopUp());
-    next = document.querySelector(".modal-next");
-    next.addEventListener("click", (e) => nextPopUp());
-    previous = document.querySelector(".modal-prev");
-    previous.addEventListener("click", (e) => previousPopUp());
-  }
-});
+//Create search Inputfield
+function searchDisplay() {
+  const searchContainer = document.querySelector(".search-container");
+  const html = `
+    <form action="#" method="get">
+                            <input type="search" id="search-input" class="search-input" placeholder="Search...">
+                            <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
+                        </form>
+  `;
+  searchContainer.insertAdjacentHTML("beforeend", html);
+  const searchInput = document.querySelector(".search-input");
+  searchInput.addEventListener("keyup", (e) => searchFunction(employees));
+}
+
 fetchData(randomUserUrl);
